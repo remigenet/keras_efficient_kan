@@ -1,4 +1,13 @@
-# REPONAME
+# Keras Efficient Kan 
+
+Keras package reproducting the pytorch [efficient_kan implementation](https://github.com/Blealtan/efficient-kan)
+
+Package is available on pypi [here](https://pypi.org/project/keras-efficient-kan/)
+
+It implements KANLinear based on [Kolmogorov-Arnold Network](https://arxiv.org/abs/2404.19756) that can be used as a drop-in replacement for Dense layers in Keras models.
+
+It supports array with more than 2 dimensions, applying the same transformation to all the dimensions except the last one.
+
 
 Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 

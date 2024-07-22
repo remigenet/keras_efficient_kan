@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "keras_efficient_kan"
+version = "0.1.4"
+description = "Keras Efficient KAN"
+authors = ["Rémi Genet", "Hugo Inzirillo"]
+readme = "README.md"
+packages = [{include = "keras_efficient_kan"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+keras = "^3.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-xdist = "^3.3.0"
+tensorflow = "^2.15.0"
+torch = "^2.0.0"
+jax = "^0.4.13"
+jaxlib = "^0.4.13"
+
+[tool.pytest.ini_options]
+addopts = "-v"
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore:Can't initialize NVML:UserWarning",
+    "ignore:jax.xla_computation is deprecated:DeprecationWarning"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
