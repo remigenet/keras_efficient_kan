@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "keras_efficient_kan"
-version = "0.1.4"
+version = "0.1.5"
 description = "Keras Efficient KAN"
 authors = ["Rémi Genet", "Hugo Inzirillo"]
 readme = "README.md"

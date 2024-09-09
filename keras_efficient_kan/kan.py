@@ -31,6 +31,10 @@ class GridInitializer(initializers.Initializer):
             "spline_order": self.spline_order
         }
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
 class KANLinear(Layer):
     def __init__(
         self,
@@ -84,8 +88,8 @@ class KANLinear(Layer):
             initializer='glorot_uniform',
             dtype=dtype
         )
-        if self.use_layernorm:
-            self.layer_norm = LayerNormalization(axis=-1)
+        self.layer_norm = LayerNormalization(axis=-1)
+        self.layer_norm.build([None, self.in_features])
         self.dropout = Dropout(self.dropout_rate)
 
     def call(self, x, training=None):
@@ -135,6 +139,7 @@ class KANLinear(Layer):
             'dropout': self.dropout_rate,
             'use_bias': self.use_bias,
             'use_layernorm': self.use_layernorm,
+            'layer_norm': self.layer_norm.get_config() if self.use_layernorm else None,
         })
         return config
 
