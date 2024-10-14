@@ -1,3 +1,4 @@
+import numpy as np
 import keras
 from keras import ops
 from keras import backend
@@ -17,14 +18,17 @@ class GridInitializer(initializers.Initializer):
         stop = (self.grid_size + self.spline_order) * h + self.grid_range[0]
         num = self.grid_size + 2 * self.spline_order + 1
         
-        # Create a range of integers from 0 to num-1
-        indices = ops.arange(num, dtype=dtype)
+        # Create the grid using numpy
+        grid = np.linspace(start, stop, num, dtype=np.float32)
         
-        # Scale and shift the indices to create the grid
-        grid = start + (stop - start) * indices / (num - 1)
+        # Repeat the grid for each feature
+        grid = np.tile(grid, (shape[1], 1))
         
-        grid = ops.expand_dims(grid, 0)
-        return ops.tile(grid, [shape[0], 1])
+        # Add the batch dimension
+        grid = np.expand_dims(grid, 0)
+        
+        # Convert to the appropriate backend tensor
+        return ops.convert_to_tensor(grid, dtype=dtype)
 
     def get_config(self):
         return {
@@ -65,6 +69,7 @@ class KANLinear(Layer):
             self.layer_norm = LayerNormalization(axis=-1)
         else:
             self.layer_norm = None
+        self.in_features = None
 
     def build(self, input_shape):
         self.in_features = input_shape[-1]
@@ -77,6 +82,7 @@ class KANLinear(Layer):
             trainable=False,
             dtype=dtype
         )
+
         self.base_weight = self.add_weight(
             name="base_weight",
             shape=[self.in_features, self.units],
