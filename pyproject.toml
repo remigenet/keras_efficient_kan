@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "keras_efficient_kan"
-version = "0.1.6"
+version = "0.1.7"
 description = "Keras Efficient KAN"
 authors = ["Rémi Genet", "Hugo Inzirillo"]
 readme = "README.md"
@@ -23,7 +23,9 @@ addopts = "-v"
 testpaths = ["tests"]
 filterwarnings = [
     "ignore:Can't initialize NVML:UserWarning",
-    "ignore:jax.xla_computation is deprecated:DeprecationWarning"
+    "ignore:jax.xla_computation is deprecated:DeprecationWarning",
+    "ignore:Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new:DeprecationWarning",
+    "ignore:Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new:DeprecationWarning"
 ]
 
 [build-system]

@@ -35,6 +35,7 @@ class GridInitializer(initializers.Initializer):
     def from_config(cls, config):
         return cls(**config)
 
+
 class KANLinear(Layer):
     def __init__(
         self,
@@ -57,6 +58,11 @@ class KANLinear(Layer):
         self.use_bias = use_bias
         self.use_layernorm = use_layernorm
         self.dropout_rate = dropout
+        self.dropout = Dropout(self.dropout_rate)
+        if self.use_layernorm:
+            self.layer_norm = LayerNormalization(axis=-1)
+        else:
+            self.layer_norm = None
 
     def build(self, input_shape):
         self.in_features = input_shape[-1]
@@ -88,9 +94,10 @@ class KANLinear(Layer):
             initializer='glorot_uniform',
             dtype=dtype
         )
-        self.layer_norm = LayerNormalization(axis=-1)
-        self.layer_norm.build([None, self.in_features])
-        self.dropout = Dropout(self.dropout_rate)
+        if self.use_layernorm:
+            self.layer_norm.build(input_shape)
+        
+        self.built = True
 
     def call(self, x, training=None):
         input_shape = ops.shape(x)
@@ -139,9 +146,14 @@ class KANLinear(Layer):
             'dropout': self.dropout_rate,
             'use_bias': self.use_bias,
             'use_layernorm': self.use_layernorm,
-            'layer_norm': self.layer_norm.get_config() if self.use_layernorm else None,
         })
         return config
+
+    def get_build_config(self):
+        return {"in_features": self.in_features}
+
+    def build_from_config(self, config):
+        self.build((None, config["in_features"]))
 
     @classmethod
     def from_config(cls, config):

@@ -1,4 +1,5 @@
 import os
+import tempfile
 BACKEND = 'jax'
 os.environ['KERAS_BACKEND'] = BACKEND
 
@@ -7,6 +8,8 @@ import keras
 from keras import ops
 from keras import backend
 from keras import random
+from keras.models import Model, load_model
+from keras.layers import Input
 from keras_efficient_kan import KANLinear
 
 
@@ -105,3 +108,43 @@ def test_kanlinear_5d(kan_layer_5d):
     different_slice = output_5d[0, 1, 1]
     assert not ops.all(ops.abs(slices_to_check[0] - different_slice) < 1e-5), \
         "Transformation is incorrectly consistent for different inputs"
+
+def test_kanlinear_save_and_load():
+    assert keras.backend.backend() == BACKEND
+    batch_size, features = 32, 8
+    units = 16
+
+    # Create and compile the model
+    inputs = Input(shape=(features,))
+    outputs = KANLinear(units=units, grid_size=3, spline_order=3)(inputs)
+    model = Model(inputs, outputs)
+    model.compile(optimizer='adam', loss='mse')
+
+    # Generate some random data
+    x_train = generate_random_tensor((batch_size, features))
+    y_train = generate_random_tensor((batch_size, units))
+
+    # Train the model
+    model.fit(x_train, y_train, epochs=1, batch_size=16, verbose=False)
+
+    # Get predictions before saving
+    predictions_before = model.predict(x_train, verbose=False)
+
+    # Save the model
+    with tempfile.TemporaryDirectory() as tmpdir:
+        model_path = os.path.join(tmpdir, 'kan_model.keras')
+        model.save(model_path)
+
+        # Load the model
+        loaded_model = load_model(model_path, custom_objects={'KANLinear': KANLinear})
+
+    # Get predictions after loading
+    predictions_after = loaded_model.predict(x_train, verbose=False)
+
+    # Compare predictions
+    assert ops.all(ops.equal(predictions_before, predictions_after)), "Predictions should be the same after loading"
+
+    # Test that the loaded model can be used for further training
+    loaded_model.fit(x_train, y_train, epochs=1, batch_size=16, verbose=False)
+
+    print("KANLinear model successfully saved, loaded, and reused.")
