@@ -108,7 +108,7 @@ def test_kanlinear_5d(kan_layer_5d):
     assert not ops.all(ops.abs(slices_to_check[0] - different_slice) < 1e-5), \
         "Transformation is incorrectly consistent for different inputs"
 
-def test_kanlinear_save_and_load():
+def test_kanlinear2D_save_and_load():
     assert keras.backend.backend() == BACKEND
     batch_size, features = 32, 8
     units = 16
@@ -122,6 +122,46 @@ def test_kanlinear_save_and_load():
     # Generate some random data
     x_train = generate_random_tensor((batch_size, features))
     y_train = generate_random_tensor((batch_size, units))
+
+    # Train the model
+    model.fit(x_train, y_train, epochs=1, batch_size=16, verbose=False)
+
+    # Get predictions before saving
+    predictions_before = model.predict(x_train, verbose=False)
+
+    # Save the model
+    with tempfile.TemporaryDirectory() as tmpdir:
+        model_path = os.path.join(tmpdir, 'kan_model.keras')
+        model.save(model_path)
+
+        # Load the model
+        loaded_model = load_model(model_path, custom_objects={'KANLinear': KANLinear})
+
+    # Get predictions after loading
+    predictions_after = loaded_model.predict(x_train, verbose=False)
+
+    # Compare predictions
+    assert ops.all(ops.equal(predictions_before, predictions_after)), "Predictions should be the same after loading"
+
+    # Test that the loaded model can be used for further training
+    loaded_model.fit(x_train, y_train, epochs=1, batch_size=16, verbose=False)
+
+    print("KANLinear model successfully saved, loaded, and reused.")
+
+def test_kanlinear3D_save_and_load():
+    assert keras.backend.backend() == BACKEND
+    batch_size, timestep, features = 32, 10, 8
+    units = 16
+
+    # Create and compile the model
+    inputs = Input(shape=(timestep, features))
+    outputs = KANLinear(units=units, grid_size=3, spline_order=3)(KANLinear(units=10, grid_size=10, spline_order=2)(inputs))
+    model = Model(inputs, outputs)
+    model.compile(optimizer='adam', loss='mse')
+
+    # Generate some random data
+    x_train = generate_random_tensor((batch_size, timestep, features))
+    y_train = generate_random_tensor((batch_size, timestep, units))
 
     # Train the model
     model.fit(x_train, y_train, epochs=1, batch_size=16, verbose=False)
