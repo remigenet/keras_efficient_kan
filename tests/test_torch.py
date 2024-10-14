@@ -136,7 +136,7 @@ def test_kanlinear2D_save_and_load():
         model.save(model_path)
 
         # Load the model
-        loaded_model = load_model(model_path, custom_objects={'KANLinear': KANLinear})
+        loaded_model = load_model(model_path)
 
     # Get predictions after loading
     predictions_after = loaded_model.predict(x_train, verbose=False)
@@ -176,7 +176,7 @@ def test_kanlinear3D_save_and_load():
         model.save(model_path)
 
         # Load the model
-        loaded_model = load_model(model_path, custom_objects={'KANLinear': KANLinear})
+        loaded_model = load_model(model_path)
 
     # Get predictions after loading
     predictions_after = loaded_model.predict(x_train, verbose=False)

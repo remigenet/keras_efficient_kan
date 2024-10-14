@@ -1,8 +1,10 @@
+import keras
 from keras import ops
 from keras import backend
 from keras.src import initializers
 from keras.src.layers import Layer, Dropout, LayerNormalization
 
+@keras.utils.register_keras_serializable(package="keras_efficient_kan", name="GridInitializer")
 class GridInitializer(initializers.Initializer):
     def __init__(self, grid_range, grid_size, spline_order):
         self.grid_range = grid_range
@@ -35,7 +37,7 @@ class GridInitializer(initializers.Initializer):
     def from_config(cls, config):
         return cls(**config)
 
-
+@keras.utils.register_keras_serializable(package="keras_efficient_kan", name="KANLinear")
 class KANLinear(Layer):
     def __init__(
         self,
